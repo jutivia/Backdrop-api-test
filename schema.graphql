@@ -1,0 +1,27 @@
+
+type User{
+  name:  String,
+  email: String,
+  country: String,
+  password: String,
+  is_verified: Boolean,
+}
+type userAccountDetails{
+    user_account_number: String,
+    user_bank_code: String,
+    user_account_name: String,
+}
+type loginResponse  { token: String! }
+
+type accountName { account_name: String!}
+
+type Query {
+  login(email: String!, password: String!): loginResponse
+  getAccountName(bank_code: String!, account_number: String!, account_name: String): accountName
+}
+
+type Mutation {
+  verifyUser(user_account_number: String!, 
+  user_bank_code: String!, 
+  user_account_name: String!): userAccountDetails
+}
