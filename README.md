@@ -10,6 +10,11 @@
 - The getAccountName query optionally takes in the account_name
 
 #
+### Documentation
+
+[Postman link](https://documenter.getpostman.com/view/16783384/2s93Xx1Q2E)
+
+#
 ### Run the web service locally
 
 ### Open new terminal window and clone this repository
