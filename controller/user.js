@@ -2,8 +2,10 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const { BadRequestError, UnauthenticatedError, UserNotFound } = require("../errors");
-const axios = require('axios');
+
 const catchAsync = require("../utils/asynAwait");
+const {paystackResolver} = require("../utils/paystackResolver")
+
 
 const login = catchAsync(async (email, password) => {
   const user = await User.findOne({ email });
@@ -25,14 +27,17 @@ const verifyUserData = catchAsync(async ({user_account_number, user_bank_code,us
     user_bank_code
   );
 
+  console.log('data', data)
   const distance = levenshteinDistance(
     user_account_name.toLowerCase(),
     data.data.account_name.toLowerCase()
   );
 
+  console.log('b')
   if (distance > 2) {
     throw new BadRequestError("Account name provided and user account name derived has a levenshtein distance greater than 2");
   }
+  console.log('data', 'c')
  await User.findOneAndUpdate(
     { _id: userId },
     {
@@ -40,6 +45,8 @@ const verifyUserData = catchAsync(async ({user_account_number, user_bank_code,us
     },
     { new: true }
   );
+
+  console.log('data', 'd')
 
   return {
     user_account_name: capitalize(user_account_name),
@@ -57,6 +64,7 @@ const getAccountName = catchAsync(async ({bank_code, account_number, userId, acc
     account_number,
     bank_code
   );
+
   let distance = 3
    if (account_name) {
      distance = levenshteinDistance(
@@ -73,19 +81,13 @@ const verifyAccountDetails = async (
   account_number,
   bank_code
 ) => {
-  const config = {
-    headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.paystack_secret_key}`,
-    }
-  };
   if (country === "Nigeria" || country ==="Ghana") {
-    const url = `https://api.paystack.co/bank/resolve?account_number=${account_number}&bank_code=${bank_code}`;
-    return axios.get(url, config)
+    return await paystackResolver(account_number, bank_code)
     .then(response => {
      return response.data
     })
     .catch(error => {
+      console.log(error)
       throw new BadRequestError( error.response.data.message );
     });
    
@@ -93,6 +95,8 @@ const verifyAccountDetails = async (
     throw new BadRequestError("Country not yet supported");
   }
 };
+
+
 
 const levenshteinDistance = (s, t) => {
   if (!s.length) return t.length;
@@ -121,8 +125,13 @@ const capitalize = (str) => {
   .join(' ');
 }
 
+const getUserByEmail= async (str) =>{
+  return this.User.findOne({email: str})
+}
+
 module.exports = {
   verifyUserData,
   login,
-  getAccountName
+  getAccountName,
+  getUserByEmail,
 };

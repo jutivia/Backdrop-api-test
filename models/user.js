@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema(
       reuired: [true, "kindly enter a valid email"],
       lowerCase: true,
       unique: true,
+      index: true,
     },
     password: {
       type: String,
@@ -33,6 +34,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.methods.createJWT = function () {
+  console.log('createJWT called');
   return jwt.sign(
     {
       userId: this._id,
